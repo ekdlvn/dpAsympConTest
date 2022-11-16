@@ -49,3 +49,15 @@ sam_df = pd.read_csv("outdp.csv")
 
 print(sam_np)
 print(sam_df)
+
+
+p_y = np.repeat(1, 5)/5
+# p_x = np.repeat(1, 2)/2
+p_x = np.array(list(range(4))[1:])
+print(p_x)
+
+
+test_py = ft.nabla(p_y, p_x)
+test_py.shape
+print(test_py)
+

@@ -93,18 +93,31 @@ def ones(d: int) -> np.ndarray:
     """
     return np.repeat(1, d)
 
-# ####################
-# # function : nabla #
-# ####################
-# nabla = function(p.y, p.x){
-#   # p.x : nrows
-#   # p.y : ncols
-#   c = length(p.y)
-#   r = length(p.x)
-#   nab = cbind(kronecker(p.y, rbind(diag(r-1), -t(ones(r-1))) ), 
-#               kronecker(rbind(diag(c-1), -t(ones(c-1))), p.x))
-#   return(nab)
-# }
+####################
+# function : nabla #
+####################
+def nabla(p_y: np.ndarray, p_x: np.ndarray) -> np.ndarray:
+    """ Return nabla matrix when marginal probabilities are given.
+
+    Args:
+        p_y (np.ndarray): Marginal probabilities for columns
+        p_x (np.ndarray): Marginal probabilities for rows
+
+    Returns:
+        np.ndarray: Matrix for 
+    """
+    c = len(p_y)
+    r = len(p_x)
+    # change to column vector ; python treat array as a row vector
+    p_y.shape = (c,1)
+    p_x.shape = (r,1)
+
+    part_py = np.kron(p_y, np.vstack((np.identity(r-1), -ones(r-1))))
+    part_px = np.kron(np.vstack((np.identity(c-1), -ones(c-1))), p_x)
+    
+    nab = np.column_stack((part_py, part_px))
+    return nab
+
 
 # ####################
 # # function : prj.A #
