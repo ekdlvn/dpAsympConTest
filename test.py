@@ -1,5 +1,5 @@
 # C:/Users/N/AppData/Local/Programs/Python/Python39/python.exe
-import functions as ft
+# import functions as ft
 import numpy as np
 import pandas as pd
 
