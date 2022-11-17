@@ -50,13 +50,25 @@ c_name = ["d"+str(a) for a in range(5)]
 # print(sam_df)
 
 
-p_y = np.repeat(1, 5)/5
+p_y = np.repeat(1, 3)/3
 # p_x = np.repeat(1, 2)/2
 p_x = np.array(list(range(4))[1:])
 print(p_x)
 
 
-test_py = ft.nabla(p_y, p_x)
-test_py.shape
-print(test_py)
+# test_py = ft.nabla(p_y, p_x)
+# test_py.shape
+# print(test_py)
 
+test_mat = ft.prj_A(p_x, p_y)
+test_mat.keys()
+test_mat['prj_A'] #test_mat[list(test_mat.keys())[0]]
+test_mat['pi'] # test_mat[list(test_mat.keys())[1]]
+test_mat['r']
+test_mat['c']
+test_mat['Jc']
+test_mat['Jr']
+test_mat['D_half_pi']
+test_mat['D_half_inv']
+test_mat['D_pi1']
+test_mat['D_pi2']

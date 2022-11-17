@@ -118,12 +118,11 @@ def nabla(p_y: np.ndarray, p_x: np.ndarray) -> np.ndarray:
     nab = np.column_stack((part_py, part_px))
     return nab
 
-
 # ####################
 # # function : prj.A #
 # ####################
 # prj_A required to compute covariance of limiting distribution based on pi(probabilities of cells)
-def prj_A(pi_1: float, pi_2: float) -> dict:
+def prj_A(pi_1: np.ndarray, pi_2: np.ndarray) -> dict:
     """Return prj_A relates values to compute quantile of the null distribution
 
     Args:
@@ -148,11 +147,9 @@ def prj_A(pi_1: float, pi_2: float) -> dict:
     r = len(pi_1)
     c = len(pi_2)
 
-    Jc = np.ndarray(np.rep(1, c*c))
-    Jc.shape = (c,c)
-    Jr = np.ndarray(np.rep(1, r*r))
-    Jr.shape = (r, r)
-
+    Jc = np.repeat(1, c*c).reshape(c,c)
+    Jr = np.repeat(1, r*r).reshape(r,r)
+    
     D_half_pi = np.diag(np.sqrt(pi))
     D_half_inv = np.diag(1/np.sqrt(pi))
     D_pi1 = np.diag(pi_1)
