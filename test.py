@@ -1,5 +1,5 @@
 # C:/Users/N/AppData/Local/Programs/Python/Python39/python.exe
-# import functions as ft
+import functions as ft
 import numpy as np
 import pandas as pd
 
@@ -37,18 +37,17 @@ sam.sum() # sum all values
 sam.sum(axis=0) # column-wise sum
 sam.sum(axis=1) # row-wise sum
 
-np.savetxt("outnp.csv", sam, delimiter=",", fmt="%.5f")
-sam_np = np.loadtxt("outnp.csv", delimiter=",")
+# np.savetxt("outnp.csv", sam, delimiter=",", fmt="%.5f")
+# sam_np = np.loadtxt("outnp.csv", delimiter=",")
 
 c_name = ["d"+str(a) for a in range(5)]
 
-df_sam = pd.DataFrame(sam, columns=c_name)
-df_sam.to_csv("outdp.csv", mode="w")
+# df_sam = pd.DataFrame(sam, columns=c_name)
+# df_sam.to_csv("outdp.csv", mode="w")
+# sam_df = pd.read_csv("outdp.csv")
 
-sam_df = pd.read_csv("outdp.csv")
-
-print(sam_np)
-print(sam_df)
+# print(sam_np)
+# print(sam_df)
 
 
 p_y = np.repeat(1, 5)/5

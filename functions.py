@@ -122,37 +122,54 @@ def nabla(p_y: np.ndarray, p_x: np.ndarray) -> np.ndarray:
 # ####################
 # # function : prj.A #
 # ####################
-# # prj_A required to compute covariance of limiting distribution based on pi(probabilities of cells)
-def prj_A(pi_1: float, pi_2: float) -> np.ndarray:
-    
-  ## input
-  # pi_1: marginal probabilities of row variables
-  # pi_2: marginal probabilities of column variables
-  
-  pi = np.kron(pi_2, pi_1)
-  
-  r = len(pi_1)
-  c = len(pi_2)
-  
-  Jc = np.ndarray(np.rep(1, c*c))
-  Jc.shape = (c,c)
-  Jr = np.ndarray(np.rep(1, r*r))
-  Jr.shape = (r, r)
-  
-  D_half_pi = np.diag(np.sqrt(pi))
-  D_half_inv = np.diag(1/np.sqrt(pi))
-  D_pi1 = np.diag(pi_1)
-  D_pi2 = np.diag(pi_2)
-  
-  nab = nabla(pi_2, pi_1)
-  A = D.half.inv %*% nab
-  Q = qr.Q(qr(A))
-  prj.A = tcrossprod(Q) # Q%*%t(Q)
-  # prj.A = A%*%solve(t(A)%*%A)%*%t(A)
-  # prj.A = ifelse(prj.A > 1e-14, prj.A, 0) # this will change the results a lot # we need to fix the eigen values at the end of the procedures.
-  
-  return(list(A=prj.A, pi=pi, r=r, c=c, Jc=Jc, Jr=Jr, D.half.pi = D.half.pi, D.half.inv = D.half.inv, D_pi1 = D_pi1, D_pi2=D_pi2))
-}
+# prj_A required to compute covariance of limiting distribution based on pi(probabilities of cells)
+def prj_A(pi_1: float, pi_2: float) -> dict:
+    """Return prj_A relates values to compute quantile of the null distribution
+
+    Args:
+        pi_1 (float): Estimates of pi_1
+        pi_2 (float): Estimates of pi_2
+
+    Returns:
+        dict: Including values 
+        - prj_A: projected matrix for matrix A
+        - pi : kronecker pi_2 and pi_1
+        - r : Number of rows
+        - c : Number of columns
+        - Jc : c by c one matrix
+        - Jr : r by r one matrix
+        - D_half_pi : Diagonal matrix of 1/sqrt(pi)
+        - D_half_inv : Diagonal matirx of 1/pi
+        - D_pi1 : Diagonal matrix of pi_1 
+        - D_pi2 : Diagonal matrix of pi_2
+    """
+    pi = np.kron(pi_2, pi_1)
+
+    r = len(pi_1)
+    c = len(pi_2)
+
+    Jc = np.ndarray(np.rep(1, c*c))
+    Jc.shape = (c,c)
+    Jr = np.ndarray(np.rep(1, r*r))
+    Jr.shape = (r, r)
+
+    D_half_pi = np.diag(np.sqrt(pi))
+    D_half_inv = np.diag(1/np.sqrt(pi))
+    D_pi1 = np.diag(pi_1)
+    D_pi2 = np.diag(pi_2)
+
+    nab = nabla(pi_2, pi_1)
+    A = D_half_inv @ nab
+    A = np.matmul(D_half_inv, nab)
+    Q, R = np.linalg.qr(A)
+    # Q = qr.Q(qr(A))
+    # prj_A = tcrossprod(Q) # Q%*%t(Q)
+    prj_A = Q @ Q.T
+    # prj.A = A%*%solve(t(A)%*%A)%*%t(A)
+    # prj.A = ifelse(prj.A > 1e-14, prj.A, 0) # this will change the results a lot # we need to fix the eigen values at the end of the procedures.
+
+    return {'prj_A': prj_A, 'pi': pi, 'r': r, 'c': c, 'Jc': Jc, 'Jr': Jr, 'D_half_pi': D_half_pi, 'D_half_inv': D_half_inv, 'D_pi1': D_pi1, 'D_pi2': D_pi2}
+
 
 # ####################
 # # function cov.dat #
