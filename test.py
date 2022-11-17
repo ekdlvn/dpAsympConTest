@@ -20,7 +20,6 @@ x-x1
 sig = ft.Sig(mu, sum(x), sens)
 print(str(sig) + '입니다.')
 
-
 x1_sig = ft.noisyTable(x=x, sig=sig)
 
 # since np.random.normal() / seed should be set in np.random.seed()
@@ -49,20 +48,32 @@ c_name = ["d"+str(a) for a in range(5)]
 # print(sam_np)
 # print(sam_df)
 
-
-p_y = np.repeat(1, 3)/3
+p_y = np.repeat(1, 2)/2
 # p_x = np.repeat(1, 2)/2
-p_x = np.array(list(range(4))[1:])
+p_x = np.array(list(range(3))[1:])
 print(p_x)
-
 
 # test_py = ft.nabla(p_y, p_x)
 # test_py.shape
 # print(test_py)
 
-test_mat = ft.prj_A(p_x, p_y)
+# test_mat = ft.prj_A(p_x, p_y)
+# test_mat.keys()
+# test_mat['prj_A'] # test_mat[list(test_mat.keys())[0]]
+# test_mat['pi'] # test_mat[list(test_mat.keys())[1]]
+# test_mat['r']
+# test_mat['c']
+# test_mat['Jc']
+# test_mat['Jr']
+# test_mat['D_half_pi']
+# test_mat['D_half_inv']
+# test_mat['D_pi1']
+# test_mat['D_pi2']
+
+
+test_mat = ft.covDat(p_x, p_y)
 test_mat.keys()
-test_mat['prj_A'] #test_mat[list(test_mat.keys())[0]]
+test_mat['prj_A'] # test_mat[list(test_mat.keys())[0]]
 test_mat['pi'] # test_mat[list(test_mat.keys())[1]]
 test_mat['r']
 test_mat['c']
@@ -72,3 +83,5 @@ test_mat['D_half_pi']
 test_mat['D_half_inv']
 test_mat['D_pi1']
 test_mat['D_pi2']
+test_mat['covDat']
+

@@ -109,11 +109,11 @@ def nabla(p_y: np.ndarray, p_x: np.ndarray) -> np.ndarray:
     c = len(p_y)
     r = len(p_x)
     # change to column vector ; python treat array as a row vector
-    p_y.shape = (c,1)
-    p_x.shape = (r,1)
+    py = p_y.reshape(c,1)
+    px = p_x.reshape(r,1)
 
-    part_py = np.kron(p_y, np.vstack((np.identity(r-1), -ones(r-1))))
-    part_px = np.kron(np.vstack((np.identity(c-1), -ones(c-1))), p_x)
+    part_py = np.kron(py, np.vstack((np.identity(r-1), -ones(r-1))))
+    part_px = np.kron(np.vstack((np.identity(c-1), -ones(c-1))), px)
     
     nab = np.column_stack((part_py, part_px))
     return nab
@@ -173,14 +173,14 @@ def prj_A(pi_1: np.ndarray, pi_2: np.ndarray) -> dict:
 # ####################
 # # covariance consists of data covariance for the limiting distribution from multinomial distributions
 
-# covDat = function(pi_1, pi_2){
-#   prj.A = prj.A(pi_1, pi_2)
-#   A = prj.A$A; pi = prj.A$pi; r= prj.A$r; c=prj.A$c
-#   d.x = length(pi_1); d.y = length(pi_2)
-#   # cov.dat = diag(d.x*d.y) - outer(sqrt(pi), sqrt(pi)) - A
-#   cov.dat = diag(c*r) - outer(sqrt(pi), sqrt(pi)) - A
-#   return(list(cov.dat = cov.dat, pi=pi, r=r, c=c, prjA = prj.A))
-# }
+def covDat(pi_1: np.ndarray, pi_2: np.ndarray) -> dict:
+    prjA = prj_A(pi_1, pi_2)
+    idx = list(prjA.keys())
+    A = prjA[idx[0]]; pi = prjA[idx[1]]; c=prjA[idx[2]]; r=prjA[idx[3]]
+    
+    covDat = np.diag(np.repeat(1, c*r)) - np.outer(np.sqrt(pi),np.sqrt(pi)) - A
+    prjA['covDat'] = covDat
+    return prjA
 
 # #####################
 # # function : SigInG #
