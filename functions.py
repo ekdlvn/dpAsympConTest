@@ -15,37 +15,16 @@ import numpy as np
 
 def Sig(mu: float, n: int, sens: float) -> float:
     """ Return standard deviation of noise when privacy budget and sample size is given.
-
     Args:
         mu (float): Privacy Budget
         n (int): Sample size
         sens (float): Sensitivity
-
     Returns:
         float: Standard deviation of gaussian noise
     """
     return sens/mu/np.sqrt(n)
 
 missing = object()
-# def noisyTable(x, mu=None, sens=None, sig=None) -> np.ndarray:
-#     """Function to generate noisy data 
-#     input:                          
-#     - x: original data             
-#     - mu: privacy parameter        
-#     - sens: sensitivity            
-                                    
-#     output:                         
-#     - noisy data                   
-#     """
-#     if x is missing: print('There is no default values for the function.')
-#     n = sum(x)
-#     d = len(x)
-#     if (mu is None) and (sig is None): print('At least one value is required for mu or sig!')
-#     if (sig is None) and (sens is None): print('sens is required when only mu is provided.')
-#     if sig is None: sig = Sig(mu, sum(x), sens)
-#     noisyTab = x + np.random.normal(0, sig*np.sqrt(n), d)
-#     return noisyTab
-
 def noisyTable(x: np.ndarray, mu: float=None, sens: float=None, sig: float=None) -> np.ndarray:
     """Return noisy table perturbed satisfying GDP when privacy budget and sensitivity or standard deviation of noise are/is given.
 
@@ -68,20 +47,6 @@ def noisyTable(x: np.ndarray, mu: float=None, sens: float=None, sig: float=None)
     noisyTab = x + np.random.normal(0, sig*np.sqrt(n), d)
     return noisyTab
     
-# #################################################################
-# #                                                               #
-# # Set of functions to compute Sigma for Independence testing    #
-# #                                                               #
-# # input:                                                        #
-# #  - [required] pi_1: row marginal probabilities                #
-# #  - [required] pi_2: column marginal probabilities             #
-# #  - [required] sigma: st. dev. of noise                        #
-# #  - [required] type: type of test statistics                   #
-# #                                                               #
-# # output:                                                       #
-# #  - Sigma: Estimated covariance matrix                         #
-# #################################################################
-
 def ones(d: int) -> np.ndarray:
     """ Return length d one vector.
 
@@ -93,9 +58,7 @@ def ones(d: int) -> np.ndarray:
     """
     return np.repeat(1, d)
 
-####################
-# function : nabla #
-####################
+
 def nabla(p_y: np.ndarray, p_x: np.ndarray) -> np.ndarray:
     """ Return nabla matrix when marginal probabilities are given.
 
@@ -118,10 +81,7 @@ def nabla(p_y: np.ndarray, p_x: np.ndarray) -> np.ndarray:
     nab = np.column_stack((part_py, part_px))
     return nab
 
-# ####################
-# # function : prj.A #
-# ####################
-# prj_A required to compute covariance of limiting distribution based on pi(probabilities of cells)
+
 def prj_A(pi_1: np.ndarray, pi_2: np.ndarray) -> dict:
     """Return prj_A relates values to compute quantile of the null distribution
 
@@ -167,12 +127,6 @@ def prj_A(pi_1: np.ndarray, pi_2: np.ndarray) -> dict:
 
     return {'prj_A': prj_A, 'pi': pi, 'r': r, 'c': c, 'Jc': Jc, 'Jr': Jr, 'D_half_pi': D_half_pi, 'D_half_inv': D_half_inv, 'D_pi1': D_pi1, 'D_pi2': D_pi2}
 
-
-# ####################
-# # function cov.dat #
-# ####################
-# # covariance consists of data covariance for the limiting distribution from multinomial distributions
-
 def covDat(pi_1: np.ndarray, pi_2: np.ndarray) -> dict:
     prjA = prj_A(pi_1, pi_2)
     idx = list(prjA.keys())
@@ -182,89 +136,85 @@ def covDat(pi_1: np.ndarray, pi_2: np.ndarray) -> dict:
     prjA['covDat'] = covDat
     return prjA
 
-# #####################
-# # function : SigInG #
-# #####################
 # # elements consisting covariance matrix of the given distribution
-# SigInG = function(pi_1, pi_2, sig, type="I"){
-#   if(!type%in%c("I", "n", "G", "a", "In")){
-#     stop("Input type is wrong")
-#   }
-#   # tryCatch(
-#   #   error=function(e){
-#   #     cat("pi_1:", pi_1, "\n")
-#   #     cat("pi_2:", pi_2, "\n")
-#   #   }
-#   # )
-#   cov = covDat(pi_1, pi_2)
-#   cov.dat = cov$'cov.dat'
-#   pi = cov$pi ; r = cov$r; c=cov$c; prjA = cov$prjA
-#   Jr=prjA$Jr; Jc = prjA$Jc
-#   D_pi1 = prjA$D_pi1; D_pi2 = prjA$D_pi2; D.half.inv = prjA$D.half.inv; D.half.pi = prjA$D.half.pi
+def SigInG(pi_1: np.ndarray, pi_2: np.ndarray, sig: float, type: str="I") -> dict:
+    if type not in ["I", "n", "G", "a", "In"]:
+        print("Input type is wrong")
+    return
+  # tryCatch(
+  #   error=function(e){
+  #     cat("pi_1:", pi_1, "\n")
+  #     cat("pi_2:", pi_2, "\n")
+  #   }
+  # )
+  cov = covDat(pi_1, pi_2)
+  cov.dat = cov$'cov.dat'
+  pi = cov$pi ; r = cov$r; c=cov$c; prjA = cov$prjA
+  Jr=prjA$Jr; Jc = prjA$Jc
+  D_pi1 = prjA$D_pi1; D_pi2 = prjA$D_pi2; D.half.inv = prjA$D.half.inv; D.half.pi = prjA$D.half.pi
   
-#   A3 = D_pi2%*%Jc
-#   A4 = D_pi1%*%Jr
+  A3 = D_pi2%*%Jc
+  A4 = D_pi1%*%Jr
   
-#   # A1 = (diag(c)-D_pi2%*%Jc)
-#   # A2 = (diag(r)-D_pi1%*%Jr)
+  # A1 = (diag(c)-D_pi2%*%Jc)
+  # A2 = (diag(r)-D_pi1%*%Jr)
   
-#   A1 = diag(c)-A3
-#   A2 = diag(r)-A4
+  A1 = diag(c)-A3
+  A2 = diag(r)-A4
   
-#   Sig.sig.pi = sig^2 * kronecker(tcrossprod(A1), tcrossprod(A2))
-#   # Sig.sig.pi = ifelse(Sig.sig.pi < 1e-15, 0, Sig.sig.pi)
+  Sig.sig.pi = sig^2 * kronecker(tcrossprod(A1), tcrossprod(A2))
+  # Sig.sig.pi = ifelse(Sig.sig.pi < 1e-15, 0, Sig.sig.pi)
   
   
-#   if(type%in%c("n", "G", "a", "In")){
-#     # A3 = D_pi2%*%Jc
-#     # A4 = D_pi1%*%Jr
+  if(type%in%c("n", "G", "a", "In")){
+    # A3 = D_pi2%*%Jc
+    # A4 = D_pi1%*%Jr
     
-#     Sig.sig.pi.n = Sig.sig.pi + sig^2 * (kronecker(tcrossprod(A1, A3), tcrossprod(A2, A4)) # (A1%*%t(A3)), (A2%*%t(A4))) 
-#                                          + kronecker(tcrossprod(A3, A1), tcrossprod(A4, A2))  #(A3%*%t(A1)), (A4%*%t(A2)))
-#                                          + kronecker(tcrossprod(A3), tcrossprod(A4)) #(A3%*%t(A3), A4%*%t(A4))
-#     )
-#     # Sig.sig.pi.n = ifelse(Sig.sig.pi < 1e-15, 0, Sig.sig.pi.n)
-#   }
+    Sig.sig.pi.n = Sig.sig.pi + sig^2 * (kronecker(tcrossprod(A1, A3), tcrossprod(A2, A4)) # (A1%*%t(A3)), (A2%*%t(A4))) 
+                                         + kronecker(tcrossprod(A3, A1), tcrossprod(A4, A2))  #(A3%*%t(A1)), (A4%*%t(A2)))
+                                         + kronecker(tcrossprod(A3), tcrossprod(A4)) #(A3%*%t(A3), A4%*%t(A4))
+    )
+    # Sig.sig.pi.n = ifelse(Sig.sig.pi < 1e-15, 0, Sig.sig.pi.n)
+  }
   
-#   if(type%in%c("G", "a")){
-#     # A5 = kronecker(one(c), matrix(pi_1,nrow=length(pi_1)))%*%t(one(r*c))/c
-#     # A5 = kronecker(Jc, D_pi1%*%Jr)/c
-#     # A6 = kronecker(Jr, D_pi2%*%Jc)/r
-#     A5 = kronecker(Jc, A4)/c
-#     A6 = kronecker(Jr, A3)/r  
-#     Sig.sig.pi.g = Sig.sig.pi + sig^2 * (-kronecker(A3%*%t(A1), A4%*%t(A2)) # sig^2 * kronecker(tcrossprod(A1), tcrossprod(A2)) = Sig.sig.pi
-#                                          +A5%*%kronecker(t(A1), t(A2))
-#                                          +A6%*%kronecker(t(A1), t(A2))
-#                                          - kronecker(A1%*%t(A3), A2%*%t(A4))
-#                                          + kronecker(A3%*%t(A3), A4%*%t(A4))
-#                                          - A5%*% kronecker(t(A3), t(A4))
-#                                          - A6%*% kronecker(t(A3), t(A4))
-#                                          + kronecker(A1, A2)%*%t(A5)
-#                                          - kronecker(A3, A4)%*%t(A5)
-#                                          + A5%*%t(A5)
-#                                          + A6%*%t(A5)
-#                                          + kronecker(A1, A2)%*%t(A6)
-#                                          - kronecker(A3, A4)%*%t(A6)
-#                                          + A5%*%t(A6)
-#                                          + A6%*%t(A6)
-#     )
+  if(type%in%c("G", "a")){
+    # A5 = kronecker(one(c), matrix(pi_1,nrow=length(pi_1)))%*%t(one(r*c))/c
+    # A5 = kronecker(Jc, D_pi1%*%Jr)/c
+    # A6 = kronecker(Jr, D_pi2%*%Jc)/r
+    A5 = kronecker(Jc, A4)/c
+    A6 = kronecker(Jr, A3)/r  
+    Sig.sig.pi.g = Sig.sig.pi + sig^2 * (-kronecker(A3%*%t(A1), A4%*%t(A2)) # sig^2 * kronecker(tcrossprod(A1), tcrossprod(A2)) = Sig.sig.pi
+                                         +A5%*%kronecker(t(A1), t(A2))
+                                         +A6%*%kronecker(t(A1), t(A2))
+                                         - kronecker(A1%*%t(A3), A2%*%t(A4))
+                                         + kronecker(A3%*%t(A3), A4%*%t(A4))
+                                         - A5%*% kronecker(t(A3), t(A4))
+                                         - A6%*% kronecker(t(A3), t(A4))
+                                         + kronecker(A1, A2)%*%t(A5)
+                                         - kronecker(A3, A4)%*%t(A5)
+                                         + A5%*%t(A5)
+                                         + A6%*%t(A5)
+                                         + kronecker(A1, A2)%*%t(A6)
+                                         - kronecker(A3, A4)%*%t(A6)
+                                         + A5%*%t(A6)
+                                         + A6%*%t(A6)
+    )
     
-#     # Sig.sig.pi.g = ifelse(Sig.sig.pi.g < 1e-15, 0, Sig.sig.pi)
-#   }
+    # Sig.sig.pi.g = ifelse(Sig.sig.pi.g < 1e-15, 0, Sig.sig.pi)
+  }
   
-#   Sig.I = cov.dat + D.half.inv %*% Sig.sig.pi %*% D.half.inv
-#   if(type=="I") return(Sig.I)
+  Sig.I = cov.dat + D.half.inv %*% Sig.sig.pi %*% D.half.inv
+  if(type=="I") return(Sig.I)
   
-#   Sig.n = cov.dat + D.half.inv %*% Sig.sig.pi.n %*% D.half.inv
-#   if(type=="n") return(Sig.n)
+  Sig.n = cov.dat + D.half.inv %*% Sig.sig.pi.n %*% D.half.inv
+  if(type=="n") return(Sig.n)
   
-#   if(type=="In") return(list(Sig.I = Sig.I, Sig.n = Sig.n))
+  if(type=="In") return(list(Sig.I = Sig.I, Sig.n = Sig.n))
   
-#   Sig.G = cov.dat + D.half.inv %*% Sig.sig.pi.g %*% D.half.inv
-#   if(type=="G") return(Sig.G)
+  Sig.G = cov.dat + D.half.inv %*% Sig.sig.pi.g %*% D.half.inv
+  if(type=="G") return(Sig.G)
   
-#   if(type=="a") return(list(Sig.I = Sig.I, Sig.n = Sig.n, Sig.G = Sig.G))
-# }
+  if(type=="a") return(list(Sig.I = Sig.I, Sig.n = Sig.n, Sig.G = Sig.G))
 
 # #######################################################
 # #                                                     #
