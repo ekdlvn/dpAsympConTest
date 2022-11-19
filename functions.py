@@ -136,85 +136,84 @@ def covDat(pi_1: np.ndarray, pi_2: np.ndarray) -> dict:
     prjA['covDat'] = covDat
     return prjA
 
+# function for tcrossprod
+def tcrossprod(A1: np.array, A2: np.array=None) -> np.array:
+    if A2 is None:
+        return A1 @ A1.T
+    else:
+        return A1 @ A2.T
+
 # # elements consisting covariance matrix of the given distribution
-def SigInG(pi_1: np.ndarray, pi_2: np.ndarray, sig: float, type: str="I") -> dict:
+def SigInG(pi_1: np.ndarray, pi_2: np.ndarray, sig: float, type: str="I") -> np.array:
+    """Return covariance matrix for the test statistics when marginal prob. 
+    and variance of noise are provided.
+
+    Args:
+        pi_1 (np.ndarray): Row marginal probabilities
+        pi_2 (np.ndarray): Column marginal probabilities
+        sig (float): Variance of noise
+        type (str, optional): Test statistics type. Defaults to "I".
+
+    Returns:
+        dict: Covariance of square root of test statistic
+    """
     if type not in ["I", "n", "G", "a", "In"]:
         print("Input type is wrong")
-    return
-  # tryCatch(
-  #   error=function(e){
-  #     cat("pi_1:", pi_1, "\n")
-  #     cat("pi_2:", pi_2, "\n")
-  #   }
-  # )
-  cov = covDat(pi_1, pi_2)
-  cov.dat = cov$'cov.dat'
-  pi = cov$pi ; r = cov$r; c=cov$c; prjA = cov$prjA
-  Jr=prjA$Jr; Jc = prjA$Jc
-  D_pi1 = prjA$D_pi1; D_pi2 = prjA$D_pi2; D.half.inv = prjA$D.half.inv; D.half.pi = prjA$D.half.pi
-  
-  A3 = D_pi2%*%Jc
-  A4 = D_pi1%*%Jr
-  
-  # A1 = (diag(c)-D_pi2%*%Jc)
-  # A2 = (diag(r)-D_pi1%*%Jr)
-  
-  A1 = diag(c)-A3
-  A2 = diag(r)-A4
-  
-  Sig.sig.pi = sig^2 * kronecker(tcrossprod(A1), tcrossprod(A2))
-  # Sig.sig.pi = ifelse(Sig.sig.pi < 1e-15, 0, Sig.sig.pi)
-  
-  
-  if(type%in%c("n", "G", "a", "In")){
-    # A3 = D_pi2%*%Jc
-    # A4 = D_pi1%*%Jr
+        return 
+
+    cov = covDat(pi_1, pi_2)
+    cov_Dat = cov['covDat']
+    # pi = cov['pi'] 
+    # prjA = cov['prj_A']
+    Jr=cov['Jr']; Jc = cov['Jc']
+    r = cov['r']; c=cov['c'] 
+    D_pi1 = cov['D_pi1']; D_pi2 = cov['D_pi2']
+    D_half_inv = cov['D_half_inv']; D_half_pi = cov['D_half_pi']
     
-    Sig.sig.pi.n = Sig.sig.pi + sig^2 * (kronecker(tcrossprod(A1, A3), tcrossprod(A2, A4)) # (A1%*%t(A3)), (A2%*%t(A4))) 
-                                         + kronecker(tcrossprod(A3, A1), tcrossprod(A4, A2))  #(A3%*%t(A1)), (A4%*%t(A2)))
-                                         + kronecker(tcrossprod(A3), tcrossprod(A4)) #(A3%*%t(A3), A4%*%t(A4))
-    )
-    # Sig.sig.pi.n = ifelse(Sig.sig.pi < 1e-15, 0, Sig.sig.pi.n)
-  }
-  
-  if(type%in%c("G", "a")){
-    # A5 = kronecker(one(c), matrix(pi_1,nrow=length(pi_1)))%*%t(one(r*c))/c
-    # A5 = kronecker(Jc, D_pi1%*%Jr)/c
-    # A6 = kronecker(Jr, D_pi2%*%Jc)/r
-    A5 = kronecker(Jc, A4)/c
-    A6 = kronecker(Jr, A3)/r  
-    Sig.sig.pi.g = Sig.sig.pi + sig^2 * (-kronecker(A3%*%t(A1), A4%*%t(A2)) # sig^2 * kronecker(tcrossprod(A1), tcrossprod(A2)) = Sig.sig.pi
-                                         +A5%*%kronecker(t(A1), t(A2))
-                                         +A6%*%kronecker(t(A1), t(A2))
-                                         - kronecker(A1%*%t(A3), A2%*%t(A4))
-                                         + kronecker(A3%*%t(A3), A4%*%t(A4))
-                                         - A5%*% kronecker(t(A3), t(A4))
-                                         - A6%*% kronecker(t(A3), t(A4))
-                                         + kronecker(A1, A2)%*%t(A5)
-                                         - kronecker(A3, A4)%*%t(A5)
-                                         + A5%*%t(A5)
-                                         + A6%*%t(A5)
-                                         + kronecker(A1, A2)%*%t(A6)
-                                         - kronecker(A3, A4)%*%t(A6)
-                                         + A5%*%t(A6)
-                                         + A6%*%t(A6)
-    )
+    A3 = D_pi2@Jc
+    A4 = D_pi1@Jr
+    A1 = np.diag(np.repeat(1,c))-A3
+    A2 = np.diag(np.repeat(1,r))-A4
     
-    # Sig.sig.pi.g = ifelse(Sig.sig.pi.g < 1e-15, 0, Sig.sig.pi)
-  }
+    Sig_sig_pi = sig**2 * np.kron(tcrossprod(A1), tcrossprod(A2))
+    if type in ["n", "G", "a", "In"]:
+        Sig_sig_pi_n = Sig_sig_pi + sig**2 * (np.kron(tcrossprod(A1, A3), tcrossprod(A2, A4))
+                                             + np.kron(tcrossprod(A3, A1), tcrossprod(A4, A2))
+                                             + np.kron(tcrossprod(A3), tcrossprod(A4))
+                                             )
   
-  Sig.I = cov.dat + D.half.inv %*% Sig.sig.pi %*% D.half.inv
-  if(type=="I") return(Sig.I)
+    if type in ["G", "a"]:
+        A5 = np.kron(Jc, A4)/c
+        A6 = np.kron(Jr, A3)/r  
+        Sig_sig_pi_g = Sig_sig_pi + sig**2 * (-np.kron(tcrossprod(A3, A1), tcrossprod(A4, A2)) # A3%*%t(A1), A4%*%t(A2)) 
+                                             + A5 @ np.kron(A1.T, A2.T) # A5%*%kronecker(t(A1), t(A2))
+                                             + A6 @ np.kron(A1.T, A2.T) # A6%*%kronecker(t(A1), t(A2))
+                                             - np.kron(tcrossprod(A1, A3), tcrossprod(A2, A4)) # kronecker(A1%*%t(A3), A2%*%t(A4))
+                                             + np.kron(tcrossprod(A3), tcrossprod(A4)) # kronecker(A3%*%t(A3), A4%*%t(A4))
+                                             - A5 @ np.kron(A3.T, A4.T) # A5%*% kronecker(t(A3), t(A4))
+                                             - A6 @ np.kron(A3.T, A4.T) # A6%*% kronecker(t(A3), t(A4))
+                                             + np.kron(A1, A2) @ A5.T # kronecker(A1, A2)%*%t(A5)
+                                             - np.kron(A3, A4) @ A5.T # kronecker(A3, A4)%*%t(A5)
+                                             + tcrossprod(A5) # A5%*%t(A5)
+                                             + tcrossprod(A6, A5) # A6%*%t(A5)
+                                             + np.kron(A1, A2) @ A6.T # kronecker(A1, A2)%*%t(A6)
+                                             - np.kron(A3, A4) @ A6.T # kronecker(A3, A4)%*%t(A6)
+                                             + tcrossprod(A5, A6) # A5%*%t(A6)
+                                             + tcrossprod(A6) # A6%*%t(A6)
+                                             )    
   
-  Sig.n = cov.dat + D.half.inv %*% Sig.sig.pi.n %*% D.half.inv
-  if(type=="n") return(Sig.n)
-  
-  if(type=="In") return(list(Sig.I = Sig.I, Sig.n = Sig.n))
-  
-  Sig.G = cov.dat + D.half.inv %*% Sig.sig.pi.g %*% D.half.inv
-  if(type=="G") return(Sig.G)
-  
-  if(type=="a") return(list(Sig.I = Sig.I, Sig.n = Sig.n, Sig.G = Sig.G))
+    Sig_I = cov_Dat + D_half_inv @ Sig_sig_pi @ D_half_inv
+    if type=="I" : return Sig_I
+
+    Sig_n = cov_Dat + D_half_inv @ Sig_sig_pi_n @ D_half_inv
+    if type=="n" : return Sig_n
+
+    if type=="In" : return {'Sig_I': Sig_I, 'Sig_n': Sig_n}
+
+    Sig_G = cov_Dat + D_half_inv @ Sig_sig_pi_g @ D_half_inv
+    if type=="G" : return Sig_G
+
+    if type=="a" : return {'Sig_I': Sig_I, 'Sig_n': Sig_n, 'Sig_G': Sig_G}
 
 # #######################################################
 # #                                                     #
@@ -379,3 +378,26 @@ def SigInG(pi_1: np.ndarray, pi_2: np.ndarray, sig: float, type: str="I") -> dic
 #                   )
 #   return(list(hat.pi = adj.hat.pi, adjType=adjType))
 # }
+
+
+# # psum.chisq from R library mcgv : it requires c code which depends on R code
+# def psumChisq(q, lb, df = rep(1, length(lb)), nc=(rep(0, length(lb))), 
+#                sigz = 0, lower.tail = False, tol=2e-5, nlim=1e+05, trace=False):
+#     p = q
+#     r = len(lb)
+#     if len(df) == 1 : df = np.repeat(df, r)
+#     if len(nc) == 1 : nc = np.repeat(nc, r)
+#     if (len(df) != r) or (len(nc) !=r) : 
+#         print("lengths of lb, df and nc must match")
+#         return
+    
+#     df = round(df)
+#     if any (df < 1) : 
+#         print("df must be positive integers")
+#         return
+#     if all(lb==0) :
+#         print("at least one element of lb must be non-zero")
+#         return
+#     if (sigz < 0) : sigz = 0
+    
+#     for i in list(range(len(q)))
